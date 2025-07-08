@@ -701,6 +701,24 @@ body {
     .search-input {
         width: 100%;
     }
+    
+    .scrollable-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .scrollable-card {
+        height: 350px;
+    }
+    
+    .card-header h3 {
+        font-size: 0.9rem;
+    }
+    
+    .card-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+    }
 }
 
 /* Scrollbar Styling */
@@ -719,6 +737,434 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #29b6f6;
+}
+
+/* Scrollable Cards Grid */
+.scrollable-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.scrollable-card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    border-radius: 12px;
+    border: 1px solid #333;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.scrollable-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.card-header h3 {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-header h3 i {
+    color: #4fc3f7;
+    font-size: 1.1rem;
+}
+
+.card-badge {
+    background: rgba(79, 195, 247, 0.2);
+    color: #4fc3f7;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    min-width: 30px;
+    text-align: center;
+}
+
+.card-badge.critical {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+.card-badge.warning {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+}
+
+.card-badge.success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.card-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    position: relative;
+}
+
+.card-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.card-content::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+
+.card-content::-webkit-scrollbar-thumb {
+    background: #4fc3f7;
+    border-radius: 3px;
+}
+
+.card-content::-webkit-scrollbar-thumb:hover {
+    background: #29b6f6;
+}
+
+/* Scrollable Card Items */
+.scrollable-item {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #333;
+    transition: background-color 0.3s ease;
+}
+
+.scrollable-item:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.scrollable-item:last-child {
+    border-bottom: none;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.item-title {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.item-meta {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.item-description {
+    color: #b0b0b0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+}
+
+.item-tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.item-tag {
+    background: rgba(79, 195, 247, 0.2);
+    color: #4fc3f7;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.item-tag.critical {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+.item-tag.high {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+}
+
+.item-tag.medium {
+    background: rgba(255, 235, 59, 0.2);
+    color: #ffeb3b;
+}
+
+.item-tag.low {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.item-tag.info {
+    background: rgba(79, 195, 247, 0.2);
+    color: #4fc3f7;
+}
+
+.item-tag.warning {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+}
+
+.item-tag.success {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+/* Threat Intelligence Specific Styles */
+.threat-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.threat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.threat-icon.malware {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+.threat-icon.phishing {
+    background: rgba(255, 152, 0, 0.2);
+    color: #ff9800;
+}
+
+.threat-icon.ransomware {
+    background: rgba(156, 39, 176, 0.2);
+    color: #9c27b0;
+}
+
+.threat-icon.botnet {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+/* Asset Monitoring Specific Styles */
+.asset-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.asset-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.asset-status.online {
+    background: #4caf50;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+.asset-status.offline {
+    background: #f44336;
+    box-shadow: 0 0 5px rgba(244, 67, 54, 0.5);
+}
+
+.asset-status.warning {
+    background: #ff9800;
+    box-shadow: 0 0 5px rgba(255, 152, 0, 0.5);
+}
+
+.asset-info {
+    flex: 1;
+}
+
+.asset-name {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.asset-details {
+    color: #b0b0b0;
+    font-size: 0.8rem;
+}
+
+/* Vulnerability Specific Styles */
+.vuln-item {
+    border-left: 3px solid transparent;
+    padding-left: 1rem;
+}
+
+.vuln-item.critical {
+    border-left-color: #f44336;
+}
+
+.vuln-item.high {
+    border-left-color: #ff9800;
+}
+
+.vuln-item.medium {
+    border-left-color: #ffeb3b;
+}
+
+.vuln-item.low {
+    border-left-color: #4caf50;
+}
+
+.vuln-score {
+    display: inline-block;
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+/* User Activity Specific Styles */
+.user-activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.user-activity-content {
+    flex: 1;
+}
+
+.user-activity-action {
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.user-activity-details {
+    color: #b0b0b0;
+    font-size: 0.8rem;
+}
+
+/* Event Timeline Specific Styles */
+.timeline-item {
+    position: relative;
+    padding-left: 2rem;
+    border-left: 2px solid #333;
+}
+
+.timeline-item:before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 1rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4fc3f7;
+}
+
+.timeline-item.critical:before {
+    background: #f44336;
+}
+
+.timeline-item.warning:before {
+    background: #ff9800;
+}
+
+.timeline-item.success:before {
+    background: #4caf50;
+}
+
+.timeline-item:last-child {
+    border-left: none;
+}
+
+.timeline-time {
+    color: #888;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-event {
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-details {
+    color: #b0b0b0;
+    font-size: 0.8rem;
+}
+
+/* Network Traffic Specific Styles */
+.traffic-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.traffic-info {
+    flex: 1;
+}
+
+.traffic-source {
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.traffic-destination {
+    color: #b0b0b0;
+    font-size: 0.8rem;
+}
+
+.traffic-volume {
+    color: #4fc3f7;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.traffic-volume.high {
+    color: #ff9800;
+}
+
+.traffic-volume.critical {
+    color: #f44336;
 }
 
 /* Loading Animation */
