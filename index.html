@@ -40,6 +40,9 @@
                     <p id="page-subtitle">Real-time monitoring and incident response</p>
                 </div>
                 <div class="header-right">
+                    <button class="quick-actions-toggle" id="quick-actions-toggle" title="Quick Actions">
+                        <i class="fas fa-bolt"></i>
+                    </button>
                     <div class="status-indicator">
                         <span class="status-dot active"></span>
                         <span>System Active</span>
@@ -196,6 +199,60 @@
                         <!-- Alerts will be populated here -->
                     </div>
                 </div>
+                
+                <!-- Alert Actions Modal -->
+                <div id="alert-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="modal-alert-title">Alert Details</h3>
+                            <span class="close" id="close-alert-modal">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert-details" id="modal-alert-details">
+                                <!-- Alert details will be populated here -->
+                            </div>
+                            <div class="alert-actions">
+                                <h4>Actions</h4>
+                                <div class="action-buttons">
+                                    <button class="action-btn acknowledge" id="acknowledge-alert">
+                                        <i class="fas fa-check"></i> Acknowledge
+                                    </button>
+                                    <button class="action-btn investigate" id="investigate-alert">
+                                        <i class="fas fa-search"></i> Investigate
+                                    </button>
+                                    <button class="action-btn escalate" id="escalate-alert">
+                                        <i class="fas fa-arrow-up"></i> Escalate
+                                    </button>
+                                    <button class="action-btn resolve" id="resolve-alert">
+                                        <i class="fas fa-check-circle"></i> Resolve
+                                    </button>
+                                    <button class="action-btn snooze" id="snooze-alert">
+                                        <i class="fas fa-clock"></i> Snooze (1 Day)
+                                    </button>
+                                    <button class="action-btn false-positive" id="false-positive-alert">
+                                        <i class="fas fa-times"></i> False Positive
+                                    </button>
+                                    <button class="action-btn create-case" id="create-case-alert">
+                                        <i class="fas fa-folder-plus"></i> Create Case
+                                    </button>
+                                    <button class="action-btn block-ip" id="block-ip-alert">
+                                        <i class="fas fa-ban"></i> Block IP
+                                    </button>
+                                    <button class="action-btn quarantine" id="quarantine-alert">
+                                        <i class="fas fa-shield-alt"></i> Quarantine
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="alert-notes">
+                                <h4>Notes</h4>
+                                <textarea id="alert-notes" placeholder="Add investigation notes..."></textarea>
+                                <button class="action-btn save-notes" id="save-alert-notes">
+                                    <i class="fas fa-save"></i> Save Notes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- Logs Section -->
@@ -240,8 +297,101 @@
                         <!-- Cases will be populated here -->
                     </div>
                 </div>
+                
+                <!-- Case Management Modal -->
+                <div id="case-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="modal-case-title">Case Management</h3>
+                            <span class="close" id="close-case-modal">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <div class="case-details" id="modal-case-details">
+                                <!-- Case details will be populated here -->
+                            </div>
+                            <div class="case-actions">
+                                <h4>Case Actions</h4>
+                                <div class="action-buttons">
+                                    <button class="action-btn update-status" id="update-case-status">
+                                        <i class="fas fa-edit"></i> Update Status
+                                    </button>
+                                    <button class="action-btn assign-case" id="assign-case">
+                                        <i class="fas fa-user-plus"></i> Assign
+                                    </button>
+                                    <button class="action-btn add-evidence" id="add-evidence">
+                                        <i class="fas fa-file-alt"></i> Add Evidence
+                                    </button>
+                                    <button class="action-btn close-case" id="close-case">
+                                        <i class="fas fa-check-circle"></i> Close Case
+                                    </button>
+                                    <button class="action-btn escalate-case" id="escalate-case">
+                                        <i class="fas fa-arrow-up"></i> Escalate
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="case-notes">
+                                <h4>Case Notes</h4>
+                                <textarea id="case-notes" placeholder="Add case notes..."></textarea>
+                                <button class="action-btn save-case-notes" id="save-case-notes">
+                                    <i class="fas fa-save"></i> Save Notes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
         </main>
+    </div>
+
+    <!-- Quick Actions Panel -->
+    <div class="quick-actions-panel" id="quick-actions-panel">
+        <div class="quick-actions-header">
+            <h3>Quick Actions</h3>
+            <button class="close-quick-actions" id="close-quick-actions">&times;</button>
+        </div>
+        <div class="quick-actions-content">
+            <div class="quick-action-group">
+                <h4>Network Actions</h4>
+                <button class="quick-action-btn" data-action="block-ip">
+                    <i class="fas fa-ban"></i> Block IP
+                </button>
+                <button class="quick-action-btn" data-action="whitelist-ip">
+                    <i class="fas fa-check-circle"></i> Whitelist IP
+                </button>
+                <button class="quick-action-btn" data-action="scan-network">
+                    <i class="fas fa-search"></i> Scan Network
+                </button>
+            </div>
+            <div class="quick-action-group">
+                <h4>System Actions</h4>
+                <button class="quick-action-btn" data-action="restart-service">
+                    <i class="fas fa-redo"></i> Restart Service
+                </button>
+                <button class="quick-action-btn" data-action="update-firewall">
+                    <i class="fas fa-shield-alt"></i> Update Firewall
+                </button>
+                <button class="quick-action-btn" data-action="backup-system">
+                    <i class="fas fa-download"></i> Backup System
+                </button>
+            </div>
+            <div class="quick-action-group">
+                <h4>User Actions</h4>
+                <button class="quick-action-btn" data-action="lock-user">
+                    <i class="fas fa-user-lock"></i> Lock User
+                </button>
+                <button class="quick-action-btn" data-action="reset-password">
+                    <i class="fas fa-key"></i> Reset Password
+                </button>
+                <button class="quick-action-btn" data-action="revoke-access">
+                    <i class="fas fa-user-times"></i> Revoke Access
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div class="notification-container" id="notification-container">
+        <!-- Notifications will be added here dynamically -->
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

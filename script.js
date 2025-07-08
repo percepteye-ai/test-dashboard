@@ -13,6 +13,16 @@ let networkTraffic = [];
 let alertTrendsChart;
 let threatCategoriesChart;
 
+// Interactive State Management
+let currentUser = 'soc.analyst';
+let currentAlert = null;
+let currentCase = null;
+let blockedIPs = new Set();
+let quarantinedAssets = new Set();
+let lockedUsers = new Set();
+let actionHistory = [];
+let notificationQueue = [];
+
 // Initialize Dashboard
 document.addEventListener('DOMContentLoaded', function() {
     initializeData();
@@ -29,6 +39,10 @@ document.addEventListener('DOMContentLoaded', function() {
         updateMetrics();
         updateLastUpdatedTime();
     }, 30000);
+    
+    // Initialize interactive features
+    initializeInteractiveFeatures();
+    initializeNotificationSystem();
 });
 
 // Generate Synthetic Data
@@ -66,6 +80,7 @@ function generateAlerts() {
     const severities = ['critical', 'high', 'medium', 'low'];
     const sources = ['Firewall', 'IDS/IPS', 'Antivirus', 'SIEM', 'Endpoint Security', 'Web Application Firewall', 'Network Monitor', 'Email Security'];
     const ips = ['192.168.1.101', '10.0.0.45', '172.16.0.32', '192.168.2.55', '10.1.1.78', '172.20.0.15', '192.168.3.99', '10.2.2.33'];
+    const users = ['john.smith', 'sarah.johnson', 'mike.davis', 'emily.chen', 'david.wilson', 'lisa.brown', 'alex.kim', 'jessica.martinez'];
 
     alerts = [];
     for (let i = 0; i < 25; i++) {
@@ -73,6 +88,11 @@ function generateAlerts() {
         const severity = severities[Math.floor(Math.random() * severities.length)];
         const source = sources[Math.floor(Math.random() * sources.length)];
         const ip = ips[Math.floor(Math.random() * ips.length)];
+        const user = users[Math.floor(Math.random() * users.length)];
+        
+        // Generate related data IDs
+        const relatedLogs = generateRelatedLogIds();
+        const relatedCases = Math.random() > 0.7 ? [`CASE-${String(Math.floor(Math.random() * 35) + 1).padStart(4, '0')}`] : [];
         
         alerts.push({
             id: `ALT-${String(i + 1).padStart(4, '0')}`,
@@ -82,9 +102,92 @@ function generateAlerts() {
             source: source,
             timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
             ip: ip,
-            status: Math.random() > 0.3 ? 'active' : 'resolved'
+            user: user,
+            status: Math.random() > 0.3 ? 'active' : 'resolved',
+            relatedLogs: relatedLogs,
+            relatedCases: relatedCases,
+            snoozedUntil: null,
+            snoozedBy: null,
+            snoozeReason: null,
+            resolvedBy: null,
+            resolvedAt: null,
+            resolutionNotes: null,
+            falsePositiveBy: null,
+            falsePositiveAt: null,
+            falsePositiveReason: null,
+            tags: generateAlertTags(alertType),
+            affectedSystems: generateAffectedSystems(ip),
+            threatIndicators: generateThreatIndicators(alertType)
         });
     }
+}
+
+function generateRelatedLogIds() {
+    const logCount = Math.floor(Math.random() * 5) + 1;
+    const logIds = [];
+    for (let i = 0; i < logCount; i++) {
+        logIds.push(`LOG-${String(Math.floor(Math.random() * 150) + 1).padStart(6, '0')}`);
+    }
+    return logIds;
+}
+
+function generateAlertTags(alertType) {
+    const tagMap = {
+        'Malware Detection': ['malware', 'endpoint', 'threat'],
+        'Suspicious Login Activity': ['authentication', 'credential', 'user'],
+        'DDoS Attack': ['network', 'ddos', 'traffic'],
+        'Data Exfiltration': ['data', 'exfiltration', 'sensitive'],
+        'Privilege Escalation': ['privilege', 'escalation', 'admin'],
+        'Phishing Attempt': ['phishing', 'email', 'social-engineering'],
+        'Unauthorized Access': ['access', 'unauthorized', 'permission'],
+        'Brute Force Attack': ['brute-force', 'authentication', 'attack'],
+        'SQL Injection': ['sql-injection', 'web', 'database'],
+        'Cross-Site Scripting': ['xss', 'web', 'injection'],
+        'Network Intrusion': ['network', 'intrusion', 'breach'],
+        'File Integrity Violation': ['file', 'integrity', 'system'],
+        'Anomalous Network Traffic': ['network', 'anomaly', 'traffic'],
+        'Insider Threat': ['insider', 'threat', 'user'],
+        'Ransomware Activity': ['ransomware', 'encryption', 'malware']
+    };
+    return tagMap[alertType] || ['security', 'alert'];
+}
+
+function generateAffectedSystems(ip) {
+    const systems = ['Web Server', 'Database Server', 'File Server', 'Mail Server', 'DNS Server', 'Application Server'];
+    const affectedCount = Math.floor(Math.random() * 3) + 1;
+    const affected = [];
+    for (let i = 0; i < affectedCount; i++) {
+        affected.push({
+            name: systems[Math.floor(Math.random() * systems.length)],
+            ip: ip,
+            status: Math.random() > 0.3 ? 'affected' : 'normal'
+        });
+    }
+    return affected;
+}
+
+function generateThreatIndicators(alertType) {
+    const indicators = {
+        'Malware Detection': [
+            { type: 'file_hash', value: 'd41d8cd98f00b204e9800998ecf8427e', confidence: 95 },
+            { type: 'domain', value: 'malicious-domain.com', confidence: 87 },
+            { type: 'ip', value: '192.168.1.100', confidence: 92 }
+        ],
+        'Suspicious Login Activity': [
+            { type: 'ip', value: '10.0.0.45', confidence: 89 },
+            { type: 'user_agent', value: 'Mozilla/5.0 (Unknown)', confidence: 78 },
+            { type: 'geolocation', value: 'Unknown Location', confidence: 85 }
+        ],
+        'DDoS Attack': [
+            { type: 'ip', value: '172.16.0.32', confidence: 96 },
+            { type: 'traffic_pattern', value: 'High volume requests', confidence: 94 },
+            { type: 'protocol', value: 'TCP SYN flood', confidence: 91 }
+        ]
+    };
+    return indicators[alertType] || [
+        { type: 'ip', value: '192.168.1.1', confidence: 75 },
+        { type: 'domain', value: 'suspicious-site.com', confidence: 80 }
+    ];
 }
 
 function generateAlertDescription(type, ip) {
@@ -113,12 +216,19 @@ function generateLogs() {
     const logTypes = ['authentication', 'network', 'malware', 'system'];
     const logLevels = ['error', 'warning', 'info', 'debug'];
     const sources = ['auth-server', 'firewall', 'web-server', 'database', 'mail-server', 'dns-server', 'proxy', 'vpn-gateway'];
+    const users = ['john.smith', 'sarah.johnson', 'mike.davis', 'emily.chen', 'david.wilson', 'lisa.brown', 'alex.kim', 'jessica.martinez'];
     
     logs = [];
     for (let i = 0; i < 150; i++) {
         const logType = logTypes[Math.floor(Math.random() * logTypes.length)];
         const level = logLevels[Math.floor(Math.random() * logLevels.length)];
         const source = sources[Math.floor(Math.random() * sources.length)];
+        const user = users[Math.floor(Math.random() * users.length)];
+        const ip = `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+        
+        // Generate related data IDs
+        const relatedAlerts = Math.random() > 0.8 ? [`ALT-${String(Math.floor(Math.random() * 25) + 1).padStart(4, '0')}`] : [];
+        const relatedCases = Math.random() > 0.9 ? [`CASE-${String(Math.floor(Math.random() * 35) + 1).padStart(4, '0')}`] : [];
         
         logs.push({
             id: `LOG-${String(i + 1).padStart(6, '0')}`,
@@ -127,12 +237,92 @@ function generateLogs() {
             source: source,
             type: logType,
             message: generateLogMessage(logType, level, source),
-            ip: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`
+            ip: ip,
+            user: user,
+            relatedAlerts: relatedAlerts,
+            relatedCases: relatedCases,
+            sessionId: generateSessionId(),
+            requestId: generateRequestId(),
+            userAgent: generateUserAgent(),
+            geolocation: generateGeolocation(),
+            tags: generateLogTags(logType),
+            metadata: generateLogMetadata(logType, ip, user)
         });
     }
     
     // Sort logs by timestamp (newest first)
     logs.sort((a, b) => b.timestamp - a.timestamp);
+}
+
+function generateSessionId() {
+    return 'sess_' + Math.random().toString(36).substr(2, 9);
+}
+
+function generateRequestId() {
+    return 'req_' + Math.random().toString(36).substr(2, 12);
+}
+
+function generateUserAgent() {
+    const userAgents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15'
+    ];
+    return userAgents[Math.floor(Math.random() * userAgents.length)];
+}
+
+function generateGeolocation() {
+    const locations = [
+        { country: 'US', city: 'New York', lat: 40.7128, lon: -74.0060 },
+        { country: 'US', city: 'Los Angeles', lat: 34.0522, lon: -118.2437 },
+        { country: 'UK', city: 'London', lat: 51.5074, lon: -0.1278 },
+        { country: 'CA', city: 'Toronto', lat: 43.6532, lon: -79.3832 },
+        { country: 'AU', city: 'Sydney', lat: -33.8688, lon: 151.2093 }
+    ];
+    return locations[Math.floor(Math.random() * locations.length)];
+}
+
+function generateLogTags(logType) {
+    const tagMap = {
+        'authentication': ['auth', 'login', 'user'],
+        'network': ['network', 'traffic', 'connection'],
+        'malware': ['malware', 'threat', 'security'],
+        'system': ['system', 'event', 'os']
+    };
+    return tagMap[logType] || ['log', 'event'];
+}
+
+function generateLogMetadata(logType, ip, user) {
+    const metadata = {
+        ip: ip,
+        user: user,
+        timestamp: new Date().toISOString()
+    };
+    
+    switch (logType) {
+        case 'authentication':
+            metadata.authMethod = ['password', 'SSO', '2FA', 'certificate'][Math.floor(Math.random() * 4)];
+            metadata.success = Math.random() > 0.2;
+            break;
+        case 'network':
+            metadata.protocol = ['HTTP', 'HTTPS', 'SSH', 'FTP', 'SMTP'][Math.floor(Math.random() * 4)];
+            metadata.port = [80, 443, 22, 21, 25][Math.floor(Math.random() * 5)];
+            metadata.bytes = Math.floor(Math.random() * 1000000);
+            break;
+        case 'malware':
+            metadata.threatType = ['trojan', 'virus', 'worm', 'ransomware'][Math.floor(Math.random() * 4)];
+            metadata.confidence = Math.floor(Math.random() * 40) + 60;
+            metadata.action = ['quarantined', 'blocked', 'allowed'][Math.floor(Math.random() * 3)];
+            break;
+        case 'system':
+            metadata.service = ['web', 'database', 'mail', 'dns'][Math.floor(Math.random() * 4)];
+            metadata.resource = ['cpu', 'memory', 'disk', 'network'][Math.floor(Math.random() * 4)];
+            metadata.value = Math.floor(Math.random() * 100);
+            break;
+    }
+    
+    return metadata;
 }
 
 function generateLogMessage(type, level, source) {
@@ -196,6 +386,10 @@ function generateCases() {
         const priority = priorities[Math.floor(Math.random() * priorities.length)];
         const assignee = assignees[Math.floor(Math.random() * assignees.length)];
         
+        // Generate related data IDs
+        const relatedAlerts = generateRelatedAlertIds();
+        const relatedLogs = generateRelatedLogIdsForCases();
+        
         cases.push({
             id: `CASE-${String(i + 1).padStart(4, '0')}`,
             title: caseType,
@@ -204,9 +398,176 @@ function generateCases() {
             priority: priority,
             assignee: assignee,
             created: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-            updated: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
+            updated: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+            relatedAlerts: relatedAlerts,
+            relatedLogs: relatedLogs,
+            evidence: generateCaseEvidence(caseType),
+            timeline: generateCaseTimeline(caseType),
+            notes: generateCaseNotes(caseType),
+            tags: generateCaseTags(caseType),
+            stakeholders: generateCaseStakeholders(),
+            sla: generateCaseSLA(priority),
+            cost: generateCaseCost(priority, status)
         });
     }
+}
+
+function generateRelatedAlertIds() {
+    const alertCount = Math.floor(Math.random() * 3) + 1;
+    const alertIds = [];
+    for (let i = 0; i < alertCount; i++) {
+        alertIds.push(`ALT-${String(Math.floor(Math.random() * 25) + 1).padStart(4, '0')}`);
+    }
+    return alertIds;
+}
+
+function generateRelatedLogIdsForCases() {
+    const logCount = Math.floor(Math.random() * 10) + 5;
+    const logIds = [];
+    for (let i = 0; i < logCount; i++) {
+        logIds.push(`LOG-${String(Math.floor(Math.random() * 150) + 1).padStart(6, '0')}`);
+    }
+    return logIds;
+}
+
+function generateCaseEvidence(caseType) {
+    const evidence = [];
+    const evidenceTypes = ['network_logs', 'system_logs', 'memory_dump', 'disk_image', 'email_headers', 'screenshots', 'video_recording', 'witness_statement'];
+    
+    const count = Math.floor(Math.random() * 5) + 2;
+    for (let i = 0; i < count; i++) {
+        evidence.push({
+            id: `EVID-${String(i + 1).padStart(4, '0')}`,
+            type: evidenceTypes[Math.floor(Math.random() * evidenceTypes.length)],
+            description: `Evidence related to ${caseType.toLowerCase()}`,
+            collected: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+            collectedBy: ['John Smith', 'Sarah Johnson', 'Mike Davis'][Math.floor(Math.random() * 3)],
+            size: Math.floor(Math.random() * 1000000) + 1000,
+            hash: generateFileHash(),
+            chainOfCustody: generateChainOfCustody()
+        });
+    }
+    return evidence;
+}
+
+function generateFileHash() {
+    return 'sha256:' + Math.random().toString(36).substr(2, 64);
+}
+
+function generateChainOfCustody() {
+    const chain = [];
+    const steps = Math.floor(Math.random() * 3) + 2;
+    for (let i = 0; i < steps; i++) {
+        chain.push({
+            timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
+            action: ['collected', 'transferred', 'analyzed', 'stored'][Math.floor(Math.random() * 4)],
+            handler: ['John Smith', 'Sarah Johnson', 'Mike Davis'][Math.floor(Math.random() * 3)],
+            location: ['evidence_room', 'lab', 'secure_storage'][Math.floor(Math.random() * 3)]
+        });
+    }
+    return chain;
+}
+
+function generateCaseTimeline(caseType) {
+    const timeline = [];
+    const events = Math.floor(Math.random() * 8) + 5;
+    
+    for (let i = 0; i < events; i++) {
+        timeline.push({
+            timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+            event: generateTimelineEvent(caseType),
+            user: ['John Smith', 'Sarah Johnson', 'Mike Davis'][Math.floor(Math.random() * 3)],
+            details: `Timeline event ${i + 1} for ${caseType}`
+        });
+    }
+    
+    return timeline.sort((a, b) => a.timestamp - b.timestamp);
+}
+
+function generateTimelineEvent(caseType) {
+    const events = {
+        'Security Incident Response': ['Incident detected', 'Initial assessment', 'Containment initiated', 'Evidence collected', 'Analysis completed'],
+        'Malware Investigation': ['Malware detected', 'Sample collected', 'Analysis started', 'IOCs identified', 'Remediation planned'],
+        'Data Breach Investigation': ['Breach discovered', 'Scope determined', 'Affected systems identified', 'Data assessment', 'Notification prepared']
+    };
+    
+    const eventList = events[caseType] || ['Case opened', 'Investigation started', 'Evidence collected', 'Analysis completed'];
+    return eventList[Math.floor(Math.random() * eventList.length)];
+}
+
+function generateCaseNotes(caseType) {
+    const notes = [];
+    const noteCount = Math.floor(Math.random() * 5) + 2;
+    
+    for (let i = 0; i < noteCount; i++) {
+        notes.push({
+            id: `NOTE-${String(i + 1).padStart(4, '0')}`,
+            timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
+            author: ['John Smith', 'Sarah Johnson', 'Mike Davis'][Math.floor(Math.random() * 3)],
+            content: `Investigation note ${i + 1} for ${caseType}: ${generateNoteContent(caseType)}`,
+            type: ['investigation', 'analysis', 'recommendation', 'action'][Math.floor(Math.random() * 4)]
+        });
+    }
+    
+    return notes.sort((a, b) => b.timestamp - a.timestamp);
+}
+
+function generateNoteContent(caseType) {
+    const contents = {
+        'Security Incident Response': 'Initial assessment indicates potential security breach requiring immediate attention.',
+        'Malware Investigation': 'Malware analysis reveals sophisticated attack vector with multiple entry points.',
+        'Data Breach Investigation': 'Data analysis shows unauthorized access to sensitive customer information.'
+    };
+    return contents[caseType] || 'Investigation proceeding according to established procedures.';
+}
+
+function generateCaseTags(caseType) {
+    const tagMap = {
+        'Security Incident Response': ['incident', 'response', 'security'],
+        'Malware Investigation': ['malware', 'investigation', 'threat'],
+        'Data Breach Investigation': ['breach', 'data', 'investigation'],
+        'Insider Threat Investigation': ['insider', 'threat', 'user'],
+        'Phishing Campaign Analysis': ['phishing', 'campaign', 'email'],
+        'Network Intrusion Investigation': ['network', 'intrusion', 'breach'],
+        'Fraud Investigation': ['fraud', 'financial', 'investigation'],
+        'Compliance Violation': ['compliance', 'violation', 'regulatory'],
+        'Vulnerability Assessment': ['vulnerability', 'assessment', 'security'],
+        'Threat Hunting': ['threat', 'hunting', 'proactive']
+    };
+    return tagMap[caseType] || ['case', 'investigation', 'security'];
+}
+
+function generateCaseStakeholders() {
+    const stakeholders = [];
+    const stakeholderTypes = ['IT', 'Legal', 'HR', 'Management', 'External Vendor', 'Law Enforcement'];
+    const count = Math.floor(Math.random() * 4) + 2;
+    
+    for (let i = 0; i < count; i++) {
+        stakeholders.push({
+            name: stakeholderTypes[Math.floor(Math.random() * stakeholderTypes.length)],
+            role: ['primary', 'secondary', 'consultant'][Math.floor(Math.random() * 3)],
+            contact: `contact${i + 1}@company.com`,
+            notified: Math.random() > 0.5
+        });
+    }
+    
+    return stakeholders;
+}
+
+function generateCaseSLA(priority) {
+    const slaMap = {
+        'critical': { response: '1 hour', resolution: '4 hours' },
+        'high': { response: '4 hours', resolution: '24 hours' },
+        'medium': { response: '24 hours', resolution: '72 hours' },
+        'low': { response: '72 hours', resolution: '1 week' }
+    };
+    return slaMap[priority] || { response: '24 hours', resolution: '72 hours' };
+}
+
+function generateCaseCost(priority, status) {
+    const baseCost = { critical: 5000, high: 3000, medium: 1500, low: 500 };
+    const multiplier = status === 'closed' ? 1 : (status === 'investigating' ? 0.6 : 0.3);
+    return Math.floor(baseCost[priority] * multiplier);
 }
 
 function generateCaseDescription(type) {
@@ -726,10 +1087,22 @@ function renderAlerts(filter = 'all', search = '') {
         );
     }
     
-    alertsList.innerHTML = filteredAlerts.map(alert => `
-        <div class="alert-item ${alert.severity}">
+    alertsList.innerHTML = filteredAlerts.map(alert => {
+        const snoozeInfo = alert.snoozedUntil ? 
+            `<div class="snooze-info">Snoozed until ${formatTime(alert.snoozedUntil)}</div>` : '';
+        
+        const snoozeButton = alert.status === 'snoozed' ? 
+            `<button class="alert-action-mini unsnooze" onclick="event.stopPropagation(); unsnoozeAlert('${alert.id}')" title="Unsnooze">
+                <i class="fas fa-clock"></i>
+            </button>` : '';
+        
+        return `
+        <div class="alert-item ${alert.severity} ${alert.status}" data-alert-id="${alert.id}" onclick="openAlertModal('${alert.id}')">
             <div class="alert-header">
-                <h3 class="alert-title">${alert.title}</h3>
+                <h3 class="alert-title">
+                    <span class="status-indicator ${alert.status}"></span>
+                    ${alert.title}
+                </h3>
                 <span class="alert-severity ${alert.severity}">${alert.severity}</span>
             </div>
             <p class="alert-description">${alert.description}</p>
@@ -737,8 +1110,30 @@ function renderAlerts(filter = 'all', search = '') {
                 <span class="alert-source">Source: ${alert.source}</span>
                 <span class="alert-time">${formatTime(alert.timestamp)}</span>
             </div>
+            ${snoozeInfo}
+            <div class="alert-actions-mini">
+                <button class="alert-action-mini acknowledge" onclick="event.stopPropagation(); acknowledgeAlert('${alert.id}')" title="Acknowledge">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="alert-action-mini investigate" onclick="event.stopPropagation(); investigateAlert('${alert.id}')" title="Investigate">
+                    <i class="fas fa-search"></i>
+                </button>
+                <button class="alert-action-mini escalate" onclick="event.stopPropagation(); escalateAlert('${alert.id}')" title="Escalate">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button class="alert-action-mini resolve" onclick="event.stopPropagation(); resolveAlert('${alert.id}')" title="Resolve">
+                    <i class="fas fa-check-circle"></i>
+                </button>
+                <button class="alert-action-mini snooze" onclick="event.stopPropagation(); snoozeAlert('${alert.id}')" title="Snooze">
+                    <i class="fas fa-clock"></i>
+                </button>
+                ${snoozeButton}
+                <button class="alert-action-mini false-positive" onclick="event.stopPropagation(); markFalsePositive('${alert.id}')" title="False Positive">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function renderLogs(filter = 'all', search = '') {
@@ -787,7 +1182,7 @@ function renderCases(filter = 'all', search = '') {
     }
     
     casesList.innerHTML = filteredCases.map(case_ => `
-        <div class="case-item">
+        <div class="case-item" data-case-id="${case_.id}" onclick="openCaseModal('${case_.id}')">
             <div class="case-header">
                 <h3 class="case-id">${case_.id}</h3>
                 <span class="case-status ${case_.status}">${case_.status}</span>
@@ -797,6 +1192,20 @@ function renderCases(filter = 'all', search = '') {
             <div class="case-meta">
                 <span class="case-assignee">Assigned to: ${case_.assignee}</span>
                 <span class="case-date">Updated: ${formatDate(case_.updated)}</span>
+            </div>
+            <div class="case-actions-mini">
+                <button class="case-action-mini update" onclick="event.stopPropagation(); updateCaseStatus('${case_.id}')" title="Update Status">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="case-action-mini assign" onclick="event.stopPropagation(); assignCase('${case_.id}')" title="Assign">
+                    <i class="fas fa-user-plus"></i>
+                </button>
+                <button class="case-action-mini close" onclick="event.stopPropagation(); closeCase('${case_.id}')" title="Close Case">
+                    <i class="fas fa-check-circle"></i>
+                </button>
+                <button class="case-action-mini escalate" onclick="event.stopPropagation(); escalateCase('${case_.id}')" title="Escalate">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
             </div>
         </div>
     `).join('');
@@ -994,6 +1403,687 @@ function getThreatIcon(type) {
     return icons[type] || 'fa-exclamation-triangle';
 }
 
+// Interactive Features
+function initializeInteractiveFeatures() {
+    // Modal event listeners
+    document.getElementById('close-alert-modal').addEventListener('click', closeAlertModal);
+    document.getElementById('close-case-modal').addEventListener('click', closeCaseModal);
+    
+    // Alert action listeners
+    document.getElementById('acknowledge-alert').addEventListener('click', () => acknowledgeAlert(currentAlert?.id));
+    document.getElementById('investigate-alert').addEventListener('click', () => investigateAlert(currentAlert?.id));
+    document.getElementById('escalate-alert').addEventListener('click', () => escalateAlert(currentAlert?.id));
+    document.getElementById('resolve-alert').addEventListener('click', () => resolveAlert(currentAlert?.id));
+    document.getElementById('snooze-alert').addEventListener('click', () => snoozeAlert(currentAlert?.id));
+    document.getElementById('false-positive-alert').addEventListener('click', () => markFalsePositive(currentAlert?.id));
+    document.getElementById('create-case-alert').addEventListener('click', () => createCaseFromAlert(currentAlert?.id));
+    document.getElementById('block-ip-alert').addEventListener('click', () => blockIPFromAlert(currentAlert?.id));
+    document.getElementById('quarantine-alert').addEventListener('click', () => quarantineFromAlert(currentAlert?.id));
+    document.getElementById('save-alert-notes').addEventListener('click', saveAlertNotes);
+    
+    // Case action listeners
+    document.getElementById('update-case-status').addEventListener('click', () => updateCaseStatus(currentCase?.id));
+    document.getElementById('assign-case').addEventListener('click', () => assignCase(currentCase?.id));
+    document.getElementById('add-evidence').addEventListener('click', () => addEvidenceToCase(currentCase?.id));
+    document.getElementById('close-case').addEventListener('click', () => closeCase(currentCase?.id));
+    document.getElementById('escalate-case').addEventListener('click', () => escalateCase(currentCase?.id));
+    document.getElementById('save-case-notes').addEventListener('click', saveCaseNotes);
+    
+    // Quick actions panel
+    document.getElementById('quick-actions-toggle').addEventListener('click', toggleQuickActionsPanel);
+    document.getElementById('close-quick-actions').addEventListener('click', toggleQuickActionsPanel);
+    
+    // Quick action buttons
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const action = e.currentTarget.getAttribute('data-action');
+            executeQuickAction(action);
+        });
+    });
+    
+    // Close modals when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            closeAlertModal();
+            closeCaseModal();
+        }
+    });
+}
+
+function initializeNotificationSystem() {
+    // Process notification queue every 2 seconds
+    setInterval(processNotificationQueue, 2000);
+}
+
+// Alert Management Functions
+function openAlertModal(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
+    
+    currentAlert = alert;
+    document.getElementById('modal-alert-title').textContent = alert.title;
+    
+    const details = document.getElementById('modal-alert-details');
+    let relatedDataHtml = '';
+    
+    // Show related logs
+    if (alert.relatedLogs && alert.relatedLogs.length > 0) {
+        relatedDataHtml += `
+            <div class="alert-detail-row">
+                <strong>Related Logs:</strong> ${alert.relatedLogs.join(', ')}
+            </div>
+        `;
+    }
+    
+    // Show related cases
+    if (alert.relatedCases && alert.relatedCases.length > 0) {
+        relatedDataHtml += `
+            <div class="alert-detail-row">
+                <strong>Related Cases:</strong> ${alert.relatedCases.join(', ')}
+            </div>
+        `;
+    }
+    
+    // Show tags
+    if (alert.tags && alert.tags.length > 0) {
+        relatedDataHtml += `
+            <div class="alert-detail-row">
+                <strong>Tags:</strong> ${alert.tags.map(tag => `<span class="item-tag">${tag}</span>`).join(' ')}
+            </div>
+        `;
+    }
+    
+    // Show snooze info if snoozed
+    if (alert.snoozedUntil) {
+        relatedDataHtml += `
+            <div class="alert-detail-row">
+                <strong>Snoozed Until:</strong> ${formatTimestamp(alert.snoozedUntil)}
+            </div>
+            <div class="alert-detail-row">
+                <strong>Snoozed By:</strong> ${alert.snoozedBy}
+            </div>
+            <div class="alert-detail-row">
+                <strong>Snooze Reason:</strong> ${alert.snoozeReason}
+            </div>
+        `;
+    }
+    
+    // Show resolution info if resolved
+    if (alert.resolvedAt) {
+        relatedDataHtml += `
+            <div class="alert-detail-row">
+                <strong>Resolved At:</strong> ${formatTimestamp(alert.resolvedAt)}
+            </div>
+            <div class="alert-detail-row">
+                <strong>Resolved By:</strong> ${alert.resolvedBy}
+            </div>
+            <div class="alert-detail-row">
+                <strong>Resolution Notes:</strong> ${alert.resolutionNotes}
+            </div>
+        `;
+    }
+    
+    // Show false positive info if marked as false positive
+    if (alert.falsePositiveAt) {
+        relatedDataHtml += `
+            <div class="alert-detail-row">
+                <strong>False Positive At:</strong> ${formatTimestamp(alert.falsePositiveAt)}
+            </div>
+            <div class="alert-detail-row">
+                <strong>False Positive By:</strong> ${alert.falsePositiveBy}
+            </div>
+            <div class="alert-detail-row">
+                <strong>False Positive Reason:</strong> ${alert.falsePositiveReason}
+            </div>
+        `;
+    }
+    
+    details.innerHTML = `
+        <div class="alert-detail-row">
+            <strong>ID:</strong> ${alert.id}
+        </div>
+        <div class="alert-detail-row">
+            <strong>Severity:</strong> <span class="alert-severity ${alert.severity}">${alert.severity}</span>
+        </div>
+        <div class="alert-detail-row">
+            <strong>Source:</strong> ${alert.source}
+        </div>
+        <div class="alert-detail-row">
+            <strong>IP Address:</strong> ${alert.ip}
+        </div>
+        <div class="alert-detail-row">
+            <strong>User:</strong> ${alert.user}
+        </div>
+        <div class="alert-detail-row">
+            <strong>Timestamp:</strong> ${formatTimestamp(alert.timestamp)}
+        </div>
+        <div class="alert-detail-row">
+            <strong>Status:</strong> <span class="status-indicator ${alert.status}"></span>${alert.status}
+        </div>
+        <div class="alert-detail-row">
+            <strong>Description:</strong> ${alert.description}
+        </div>
+        ${relatedDataHtml}
+        ${alert.notes ? `<div class="alert-detail-row"><strong>Notes:</strong> ${alert.notes}</div>` : ''}
+    `;
+    
+    document.getElementById('alert-notes').value = alert.notes || '';
+    document.getElementById('alert-modal').style.display = 'block';
+}
+
+function closeAlertModal() {
+    document.getElementById('alert-modal').style.display = 'none';
+    currentAlert = null;
+}
+
+function acknowledgeAlert(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
+    
+    alert.status = 'acknowledged';
+    alert.acknowledgedBy = currentUser;
+    alert.acknowledgedAt = new Date();
+    
+    logAction('acknowledge', 'alert', alertId, `Alert ${alertId} acknowledged by ${currentUser}`);
+    showNotification('success', 'Alert Acknowledged', `Alert ${alertId} has been acknowledged`);
+    
+    renderAlerts();
+    updateMetrics();
+}
+
+function investigateAlert(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
+    
+    alert.status = 'investigating';
+    alert.investigatedBy = currentUser;
+    alert.investigatedAt = new Date();
+    
+    logAction('investigate', 'alert', alertId, `Alert ${alertId} investigation started by ${currentUser}`);
+    showNotification('info', 'Investigation Started', `Investigation initiated for alert ${alertId}`);
+    
+    renderAlerts();
+    updateMetrics();
+}
+
+function escalateAlert(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
+    
+    alert.status = 'escalated';
+    alert.escalatedBy = currentUser;
+    alert.escalatedAt = new Date();
+    
+    logAction('escalate', 'alert', alertId, `Alert ${alertId} escalated by ${currentUser}`);
+    showNotification('warning', 'Alert Escalated', `Alert ${alertId} has been escalated to management`);
+    
+    renderAlerts();
+    updateMetrics();
+}
+
+function markFalsePositive(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
+    
+    alert.status = 'false-positive';
+    alert.falsePositiveBy = currentUser;
+    alert.falsePositiveAt = new Date();
+    alert.falsePositiveReason = 'Confirmed false positive after investigation';
+    
+    logAction('false-positive', 'alert', alertId, `Alert ${alertId} marked as false positive by ${currentUser}`);
+    showNotification('info', 'False Positive', `Alert ${alertId} marked as false positive`);
+    
+    renderAlerts();
+    updateMetrics();
+}
+
+function resolveAlert(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
+    
+    alert.status = 'resolved';
+    alert.resolvedBy = currentUser;
+    alert.resolvedAt = new Date();
+    alert.resolutionNotes = 'Alert resolved after investigation and remediation';
+    
+    logAction('resolve-alert', 'alert', alertId, `Alert ${alertId} resolved by ${currentUser}`);
+    showNotification('success', 'Alert Resolved', `Alert ${alertId} has been resolved`);
+    
+    renderAlerts();
+    updateMetrics();
+}
+
+function snoozeAlert(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
+    
+    const snoozeUntil = new Date();
+    snoozeUntil.setDate(snoozeUntil.getDate() + 1); // Snooze for 1 day
+    
+    alert.snoozedUntil = snoozeUntil;
+    alert.snoozedBy = currentUser;
+    alert.snoozeReason = 'Snoozed for 24 hours for further investigation';
+    alert.status = 'snoozed';
+    
+    logAction('snooze-alert', 'alert', alertId, `Alert ${alertId} snoozed until ${snoozeUntil.toLocaleString()} by ${currentUser}`);
+    showNotification('success', 'Alert Snoozed', `Alert ${alertId} snoozed for 24 hours`);
+    
+    renderAlerts();
+    updateMetrics();
+}
+
+function unsnoozeAlert(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
+    
+    alert.snoozedUntil = null;
+    alert.snoozedBy = null;
+    alert.snoozeReason = null;
+    alert.status = 'active';
+    
+    logAction('unsnooze-alert', 'alert', alertId, `Alert ${alertId} unsnoozed by ${currentUser}`);
+    showNotification('success', 'Alert Unsnoozed', `Alert ${alertId} is now active again`);
+    
+    renderAlerts();
+    updateMetrics();
+}
+
+function checkSnoozedAlerts() {
+    const now = new Date();
+    alerts.forEach(alert => {
+        if (alert.snoozedUntil && alert.snoozedUntil <= now && alert.status === 'snoozed') {
+            alert.status = 'active';
+            alert.snoozedUntil = null;
+            alert.snoozedBy = null;
+            alert.snoozeReason = null;
+            
+            logAction('auto-unsnooze', 'alert', alert.id, `Alert ${alert.id} automatically unsnoozed`);
+            showNotification('info', 'Alert Unsnoozed', `Alert ${alert.id} is now active again`);
+        }
+    });
+    
+    renderAlerts();
+    updateMetrics();
+}
+
+function createCaseFromAlert(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert) return;
+    
+    const newCase = {
+        id: `CASE-${String(cases.length + 1).padStart(4, '0')}`,
+        title: `Case from Alert ${alertId}`,
+        description: `Case created from alert: ${alert.title}`,
+        status: 'open',
+        priority: alert.severity,
+        assignee: currentUser,
+        created: new Date(),
+        updated: new Date(),
+        relatedAlerts: [alertId],
+        notes: `Case created from alert ${alertId} by ${currentUser}`
+    };
+    
+    cases.unshift(newCase);
+    
+    logAction('create-case', 'alert', alertId, `Case created from alert ${alertId} by ${currentUser}`);
+    showNotification('success', 'Case Created', `New case ${newCase.id} created from alert ${alertId}`);
+    
+    renderCases();
+    updateMetrics();
+    closeAlertModal();
+}
+
+function blockIPFromAlert(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert || !alert.ip) return;
+    
+    blockedIPs.add(alert.ip);
+    
+    logAction('block-ip', 'alert', alertId, `IP ${alert.ip} blocked from alert ${alertId} by ${currentUser}`);
+    showNotification('success', 'IP Blocked', `IP address ${alert.ip} has been blocked`);
+    
+    // Update network traffic to reflect blocked IPs
+    networkTraffic.forEach(traffic => {
+        if (traffic.source === alert.ip || traffic.destination === alert.ip) {
+            traffic.status = 'blocked';
+        }
+    });
+    
+    renderNetworkTraffic();
+}
+
+function quarantineFromAlert(alertId) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (!alert || !alert.ip) return;
+    
+    quarantinedAssets.add(alert.ip);
+    
+    logAction('quarantine', 'alert', alertId, `Asset ${alert.ip} quarantined from alert ${alertId} by ${currentUser}`);
+    showNotification('warning', 'Asset Quarantined', `Asset ${alert.ip} has been quarantined`);
+    
+    // Update assets to reflect quarantined status
+    assets.forEach(asset => {
+        if (asset.ip === alert.ip) {
+            asset.status = 'quarantined';
+        }
+    });
+    
+    renderAssetMonitoring();
+}
+
+function saveAlertNotes() {
+    if (!currentAlert) return;
+    
+    const notes = document.getElementById('alert-notes').value;
+    currentAlert.notes = notes;
+    currentAlert.notesUpdatedBy = currentUser;
+    currentAlert.notesUpdatedAt = new Date();
+    
+    logAction('save-notes', 'alert', currentAlert.id, `Notes updated for alert ${currentAlert.id} by ${currentUser}`);
+    showNotification('success', 'Notes Saved', `Notes saved for alert ${currentAlert.id}`);
+}
+
+// Case Management Functions
+function openCaseModal(caseId) {
+    const case_ = cases.find(c => c.id === caseId);
+    if (!case_) return;
+    
+    currentCase = case_;
+    document.getElementById('modal-case-title').textContent = `Case ${case_.id}`;
+    
+    const details = document.getElementById('modal-case-details');
+    details.innerHTML = `
+        <div class="case-detail-row">
+            <strong>Case ID:</strong> ${case_.id}
+        </div>
+        <div class="case-detail-row">
+            <strong>Title:</strong> ${case_.title}
+        </div>
+        <div class="case-detail-row">
+            <strong>Status:</strong> <span class="case-status ${case_.status}">${case_.status}</span>
+        </div>
+        <div class="case-detail-row">
+            <strong>Priority:</strong> <span class="alert-severity ${case_.priority}">${case_.priority}</span>
+        </div>
+        <div class="case-detail-row">
+            <strong>Assignee:</strong> ${case_.assignee}
+        </div>
+        <div class="case-detail-row">
+            <strong>Created:</strong> ${formatDate(case_.created)}
+        </div>
+        <div class="case-detail-row">
+            <strong>Last Updated:</strong> ${formatDate(case_.updated)}
+        </div>
+        <div class="case-detail-row">
+            <strong>Description:</strong> ${case_.description}
+        </div>
+        ${case_.relatedAlerts ? `<div class="case-detail-row"><strong>Related Alerts:</strong> ${case_.relatedAlerts.join(', ')}</div>` : ''}
+        ${case_.notes ? `<div class="case-detail-row"><strong>Notes:</strong> ${case_.notes}</div>` : ''}
+    `;
+    
+    document.getElementById('case-notes').value = case_.notes || '';
+    document.getElementById('case-modal').style.display = 'block';
+}
+
+function closeCaseModal() {
+    document.getElementById('case-modal').style.display = 'none';
+    currentCase = null;
+}
+
+function updateCaseStatus(caseId) {
+    const case_ = cases.find(c => c.id === caseId);
+    if (!case_) return;
+    
+    const statuses = ['open', 'investigating', 'resolved', 'closed'];
+    const currentIndex = statuses.indexOf(case_.status);
+    const nextIndex = (currentIndex + 1) % statuses.length;
+    const newStatus = statuses[nextIndex];
+    
+    case_.status = newStatus;
+    case_.updated = new Date();
+    case_.statusUpdatedBy = currentUser;
+    
+    logAction('update-status', 'case', caseId, `Case ${caseId} status updated to ${newStatus} by ${currentUser}`);
+    showNotification('success', 'Status Updated', `Case ${caseId} status updated to ${newStatus}`);
+    
+    renderCases();
+    updateMetrics();
+}
+
+function assignCase(caseId) {
+    const case_ = cases.find(c => c.id === caseId);
+    if (!case_) return;
+    
+    const assignees = ['john.smith', 'sarah.johnson', 'mike.davis', 'emily.chen', 'david.wilson'];
+    const currentIndex = assignees.indexOf(case_.assignee);
+    const nextIndex = (currentIndex + 1) % assignees.length;
+    const newAssignee = assignees[nextIndex];
+    
+    case_.assignee = newAssignee;
+    case_.updated = new Date();
+    case_.assignedBy = currentUser;
+    
+    logAction('assign', 'case', caseId, `Case ${caseId} assigned to ${newAssignee} by ${currentUser}`);
+    showNotification('info', 'Case Assigned', `Case ${caseId} assigned to ${newAssignee}`);
+    
+    renderCases();
+}
+
+function addEvidenceToCase(caseId) {
+    const case_ = cases.find(c => c.id === caseId);
+    if (!case_) return;
+    
+    const evidenceTypes = ['Log Files', 'Network Traffic', 'Screenshots', 'Memory Dumps', 'Registry Keys'];
+    const evidenceType = evidenceTypes[Math.floor(Math.random() * evidenceTypes.length)];
+    
+    if (!case_.evidence) case_.evidence = [];
+    case_.evidence.push({
+        type: evidenceType,
+        addedBy: currentUser,
+        addedAt: new Date(),
+        description: `${evidenceType} evidence added to case`
+    });
+    
+    case_.updated = new Date();
+    
+    logAction('add-evidence', 'case', caseId, `Evidence ${evidenceType} added to case ${caseId} by ${currentUser}`);
+    showNotification('success', 'Evidence Added', `${evidenceType} evidence added to case ${caseId}`);
+}
+
+function closeCase(caseId) {
+    const case_ = cases.find(c => c.id === caseId);
+    if (!case_) return;
+    
+    case_.status = 'closed';
+    case_.updated = new Date();
+    case_.closedBy = currentUser;
+    case_.closedAt = new Date();
+    
+    logAction('close', 'case', caseId, `Case ${caseId} closed by ${currentUser}`);
+    showNotification('success', 'Case Closed', `Case ${caseId} has been closed`);
+    
+    renderCases();
+    updateMetrics();
+}
+
+function escalateCase(caseId) {
+    const case_ = cases.find(c => c.id === caseId);
+    if (!case_) return;
+    
+    case_.status = 'escalated';
+    case_.updated = new Date();
+    case_.escalatedBy = currentUser;
+    case_.escalatedAt = new Date();
+    
+    logAction('escalate', 'case', caseId, `Case ${caseId} escalated by ${currentUser}`);
+    showNotification('warning', 'Case Escalated', `Case ${caseId} has been escalated to management`);
+    
+    renderCases();
+    updateMetrics();
+}
+
+function saveCaseNotes() {
+    if (!currentCase) return;
+    
+    const notes = document.getElementById('case-notes').value;
+    currentCase.notes = notes;
+    currentCase.notesUpdatedBy = currentUser;
+    currentCase.notesUpdatedAt = new Date();
+    
+    logAction('save-notes', 'case', currentCase.id, `Notes updated for case ${currentCase.id} by ${currentUser}`);
+    showNotification('success', 'Notes Saved', `Notes saved for case ${currentCase.id}`);
+}
+
+// Quick Actions Functions
+function toggleQuickActionsPanel() {
+    const panel = document.getElementById('quick-actions-panel');
+    panel.classList.toggle('active');
+}
+
+function executeQuickAction(action) {
+    switch(action) {
+        case 'block-ip':
+            const ip = prompt('Enter IP address to block:');
+            if (ip) {
+                blockedIPs.add(ip);
+                logAction('block-ip', 'quick-action', null, `IP ${ip} blocked via quick action by ${currentUser}`);
+                showNotification('success', 'IP Blocked', `IP address ${ip} has been blocked`);
+            }
+            break;
+            
+        case 'whitelist-ip':
+            const whitelistIP = prompt('Enter IP address to whitelist:');
+            if (whitelistIP) {
+                blockedIPs.delete(whitelistIP);
+                logAction('whitelist-ip', 'quick-action', null, `IP ${whitelistIP} whitelisted via quick action by ${currentUser}`);
+                showNotification('success', 'IP Whitelisted', `IP address ${whitelistIP} has been whitelisted`);
+            }
+            break;
+            
+        case 'scan-network':
+            logAction('scan-network', 'quick-action', null, `Network scan initiated by ${currentUser}`);
+            showNotification('info', 'Network Scan', 'Network vulnerability scan initiated');
+            break;
+            
+        case 'restart-service':
+            const service = prompt('Enter service name to restart:');
+            if (service) {
+                logAction('restart-service', 'quick-action', null, `Service ${service} restart initiated by ${currentUser}`);
+                showNotification('warning', 'Service Restart', `Service ${service} restart initiated`);
+            }
+            break;
+            
+        case 'update-firewall':
+            logAction('update-firewall', 'quick-action', null, `Firewall update initiated by ${currentUser}`);
+            showNotification('info', 'Firewall Update', 'Firewall rules update initiated');
+            break;
+            
+        case 'backup-system':
+            logAction('backup-system', 'quick-action', null, `System backup initiated by ${currentUser}`);
+            showNotification('info', 'System Backup', 'System backup process initiated');
+            break;
+            
+        case 'lock-user':
+            const user = prompt('Enter username to lock:');
+            if (user) {
+                lockedUsers.add(user);
+                logAction('lock-user', 'quick-action', null, `User ${user} locked by ${currentUser}`);
+                showNotification('warning', 'User Locked', `User account ${user} has been locked`);
+            }
+            break;
+            
+        case 'reset-password':
+            const resetUser = prompt('Enter username for password reset:');
+            if (resetUser) {
+                logAction('reset-password', 'quick-action', null, `Password reset for user ${resetUser} by ${currentUser}`);
+                showNotification('info', 'Password Reset', `Password reset initiated for user ${resetUser}`);
+            }
+            break;
+            
+        case 'revoke-access':
+            const revokeUser = prompt('Enter username to revoke access:');
+            if (revokeUser) {
+                logAction('revoke-access', 'quick-action', null, `Access revoked for user ${revokeUser} by ${currentUser}`);
+                showNotification('warning', 'Access Revoked', `Access revoked for user ${revokeUser}`);
+            }
+            break;
+    }
+}
+
+// Notification System
+function showNotification(type, title, message) {
+    const notification = {
+        id: Date.now(),
+        type: type,
+        title: title,
+        message: message,
+        timestamp: new Date()
+    };
+    
+    notificationQueue.push(notification);
+}
+
+function processNotificationQueue() {
+    if (notificationQueue.length === 0) return;
+    
+    const notification = notificationQueue.shift();
+    const container = document.getElementById('notification-container');
+    
+    const notificationElement = document.createElement('div');
+    notificationElement.className = `notification ${notification.type}`;
+    notificationElement.innerHTML = `
+        <div class="notification-header">
+            <span class="notification-title">${notification.title}</span>
+            <span class="notification-close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+        </div>
+        <div class="notification-message">${notification.message}</div>
+    `;
+    
+    container.appendChild(notificationElement);
+    
+    // Auto-remove notification after 5 seconds
+    setTimeout(() => {
+        if (notificationElement.parentElement) {
+            notificationElement.remove();
+        }
+    }, 5000);
+}
+
+// Action Logging
+function logAction(action, type, id, description) {
+    const actionLog = {
+        id: `ACT-${String(actionHistory.length + 1).padStart(6, '0')}`,
+        action: action,
+        type: type,
+        targetId: id,
+        description: description,
+        user: currentUser,
+        timestamp: new Date()
+    };
+    
+    actionHistory.push(actionLog);
+    
+    // Keep only last 1000 actions
+    if (actionHistory.length > 1000) {
+        actionHistory = actionHistory.slice(-1000);
+    }
+    
+    // Add to event timeline
+    eventTimeline.unshift({
+        id: `EVT-${String(eventTimeline.length + 1).padStart(3, '0')}`,
+        event: `Action: ${action}`,
+        severity: 'info',
+        timestamp: new Date(),
+        details: description,
+        source: 'User Action'
+    });
+    
+    // Keep event timeline manageable
+    if (eventTimeline.length > 100) {
+        eventTimeline = eventTimeline.slice(0, 100);
+    }
+}
+
 // Chart Functions
 function initializeCharts() {
     initializeAlertTrendsChart();
@@ -1187,6 +2277,9 @@ function updateData() {
         logs.unshift(newLog);
         if (logs.length > 200) logs.pop();
     }
+    
+    // Check for expired snoozed alerts
+    checkSnoozedAlerts();
     
     // Update current section display
     const activeSection = document.querySelector('.content-section.active');

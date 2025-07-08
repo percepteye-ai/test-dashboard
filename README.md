@@ -11,21 +11,32 @@ A comprehensive Security Operations Center (SOC) dashboard featuring real-time m
 
 ### 🚨 Security Alerts
 - **Priority-based alerts** (Critical, High, Medium, Low) with color-coded severity levels
-- **Detailed information** including source, timestamp, IP addresses, and descriptions
+- **Advanced alert management** with resolve, snooze, and false positive actions
+- **Related data integration** connecting alerts to logs and cases
+- **Detailed information** including source, timestamp, IP addresses, user data, and descriptions
 - **Filtering and search** capabilities for efficient alert management
 - **Real-time updates** with new alerts appearing automatically
+- **Automatic snooze expiration** with notifications when alerts become active again
 
 ### 📋 Security Logs
 - **Comprehensive log viewer** with support for multiple log types (authentication, network, malware, system)
+- **Enhanced metadata** including user agents, geolocation, session IDs, and request IDs
+- **Related data connections** linking logs to alerts and cases
 - **Log level filtering** (Error, Warning, Info, Debug) with appropriate color coding
 - **Search functionality** across log messages and sources
 - **Timestamp-based sorting** with newest logs displayed first
 
 ### 📁 Security Cases
-- **Case management** with status tracking (Open, Investigating, Resolved, Closed)
+- **Comprehensive case management** with status tracking (Open, Investigating, Resolved, Closed)
+- **Evidence tracking** with chain of custody, file hashes, and collection details
+- **Timeline management** with detailed event tracking and user actions
+- **Stakeholder management** with role assignments and notification tracking
+- **SLA and cost tracking** based on priority and status
+- **Related data connections** linking cases to alerts and logs
 - **Assignment tracking** showing case ownership and responsibilities
 - **Priority levels** and detailed case descriptions
 - **Status-based filtering** and search capabilities
+- **Interactive case actions** including status updates, assignment changes, evidence addition, and case closure
 
 ## Technology Stack
 
@@ -133,6 +144,14 @@ The dashboard uses **realistic synthetic data** including:
 - **Automatic data refresh** every 30 seconds
 - **New alert generation** simulating real security events
 - **Live metrics updates** reflecting current security posture
+- **Automatic snooze management** with expiration checks and notifications
+
+### Alert Management Features
+- **Resolve Alerts**: Mark alerts as resolved with resolution notes and timestamps
+- **Snooze Alerts**: Temporarily snooze alerts for 24 hours with reason tracking
+- **False Positive Marking**: Mark alerts as false positives with detailed reasoning
+- **Related Data Viewing**: See connected logs and cases for comprehensive investigation
+- **Action History**: Track all actions taken on alerts with timestamps and user information
 
 ### Visual Design
 - **Dark theme** optimized for SOC environments
