@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOC Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-shield-alt"></i> SOC Dashboard</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#overview" class="nav-link active" data-section="overview">
+                    <i class="fas fa-chart-line"></i> Overview
+                </a></li>
+                <li><a href="#alerts" class="nav-link" data-section="alerts">
+                    <i class="fas fa-exclamation-triangle"></i> Alerts
+                </a></li>
+                <li><a href="#logs" class="nav-link" data-section="logs">
+                    <i class="fas fa-file-alt"></i> Logs
+                </a></li>
+                <li><a href="#cases" class="nav-link" data-section="cases">
+                    <i class="fas fa-folder-open"></i> Cases
+                </a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1 id="page-title">Security Operations Center</h1>
+                    <p id="page-subtitle">Real-time monitoring and incident response</p>
+                </div>
+                <div class="header-right">
+                    <div class="status-indicator">
+                        <span class="status-dot active"></span>
+                        <span>System Active</span>
+                    </div>
+                    <div class="last-updated">
+                        Last updated: <span id="last-updated-time">--</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Overview Section -->
+            <section id="overview" class="content-section active">
+                <div class="metrics-grid">
+                    <div class="metric-card critical">
+                        <div class="metric-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Critical Alerts</h3>
+                            <p class="metric-value" id="critical-alerts">0</p>
+                            <span class="metric-change">+2 from yesterday</span>
+                        </div>
+                    </div>
+                    <div class="metric-card warning">
+                        <div class="metric-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Active Incidents</h3>
+                            <p class="metric-value" id="active-incidents">0</p>
+                            <span class="metric-change">-1 from yesterday</span>
+                        </div>
+                    </div>
+                    <div class="metric-card info">
+                        <div class="metric-icon">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Open Cases</h3>
+                            <p class="metric-value" id="open-cases">0</p>
+                            <span class="metric-change">+5 from yesterday</span>
+                        </div>
+                    </div>
+                    <div class="metric-card success">
+                        <div class="metric-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="metric-content">
+                            <h3>Resolved Today</h3>
+                            <p class="metric-value" id="resolved-today">0</p>
+                            <span class="metric-change">+12 from yesterday</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Alert Trends (Last 7 Days)</h3>
+                        <canvas id="alertTrendsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Threat Categories</h3>
+                        <canvas id="threatCategoriesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <h3>Recent Activity</h3>
+                    <div class="activity-list" id="recent-activity-list">
+                        <!-- Recent activity items will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Alerts Section -->
+            <section id="alerts" class="content-section">
+                <div class="section-header">
+                    <h2>Security Alerts</h2>
+                    <div class="section-controls">
+                        <select id="alert-filter" class="filter-select">
+                            <option value="all">All Alerts</option>
+                            <option value="critical">Critical</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                        <input type="text" id="alert-search" placeholder="Search alerts..." class="search-input">
+                    </div>
+                </div>
+                <div class="alerts-container">
+                    <div class="alerts-list" id="alerts-list">
+                        <!-- Alerts will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Logs Section -->
+            <section id="logs" class="content-section">
+                <div class="section-header">
+                    <h2>Security Logs</h2>
+                    <div class="section-controls">
+                        <select id="log-filter" class="filter-select">
+                            <option value="all">All Logs</option>
+                            <option value="authentication">Authentication</option>
+                            <option value="network">Network</option>
+                            <option value="malware">Malware</option>
+                            <option value="system">System</option>
+                        </select>
+                        <input type="text" id="log-search" placeholder="Search logs..." class="search-input">
+                    </div>
+                </div>
+                <div class="logs-container">
+                    <div class="logs-list" id="logs-list">
+                        <!-- Logs will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cases Section -->
+            <section id="cases" class="content-section">
+                <div class="section-header">
+                    <h2>Security Cases</h2>
+                    <div class="section-controls">
+                        <select id="case-filter" class="filter-select">
+                            <option value="all">All Cases</option>
+                            <option value="open">Open</option>
+                            <option value="investigating">Investigating</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                        <input type="text" id="case-search" placeholder="Search cases..." class="search-input">
+                    </div>
+                </div>
+                <div class="cases-container">
+                    <div class="cases-list" id="cases-list">
+                        <!-- Cases will be populated here -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
