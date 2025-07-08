@@ -1,4 +1,4 @@
-# SOC Dashboard
+# SOC Dashboard (Mock)
 
 A comprehensive Security Operations Center (SOC) dashboard featuring real-time monitoring of security alerts, logs, and cases. This dashboard provides cybersecurity professionals with an intuitive interface to track and respond to security incidents.
 
